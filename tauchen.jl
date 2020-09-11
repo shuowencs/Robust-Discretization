@@ -33,7 +33,7 @@ function tauchen(m, ρ, N, σ²)
         P[:, k] = cdf.(Normal(0, 1), (ygrid[k] .- ρ*ygrid .+ w/2)./sqrt(σ²)) -
         cdf.(Normal(0, 1), (ygrid[k] .- ρ*ygrid .- w/2)./sqrt(σ²));
     end
-    return(transition = P, grid = ygrid)
+    return(transition = P, grid = ygrid);
 end
 
 # Univariate Tauchen and Hussey (1991)
@@ -55,11 +55,15 @@ function tauchenhussey(ρ, μ, σ², N)
     for i = 1:N
         for j = 1:N
             EZprime = (1 - ρ)*μ + ρ*grid[i];
-            P[i, j] = w[j] *
+            P[i, j] = w[j] * pdf(Normal(EZprime, sqrt(σ²)), grid[j]) /
+            pdf(Normal(μ, sqrt(σ²)), grid[j]);
         end
     end
     # Normalization
-
+    for i = 1:N
+        P[i, :] = P[i, :] ./ sum(P[i, :])
+    end
+    return(P, grid);
 end
 
 m = 3;
